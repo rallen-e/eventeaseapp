@@ -1,0 +1,41 @@
+@page "/events"
+@using EventEaseApp.Components
+@using EventEaseApp.Models
+@inject EventEaseApp.Services.EventService EventService
+
+<div class="events-page-header">
+  <div>
+    <h2 class="events-title">Upcoming events</h2>
+    <p class="events-subtitle">Browse the latest events and choose one to explore or register for.</p>
+  </div>
+</div>
+
+@if (events is null)
+{
+  <p>Loading events...</p>
+}
+else if (events.Count == 0)
+{
+  <p>No events are available right now.</p>
+}
+else
+{
+  <p>Found @events.Count events</p>
+  <div class="events-grid">
+    @foreach (var ev in events)
+    {
+      <EventCard EventItem="ev" @key="ev.Id" />
+    }
+  </div>
+}
+
+@code {
+  private List<EventModel>? events;
+
+  protected override async Task OnInitializedAsync()
+  {
+    events = await EventService.GetAllAsync();
+    Console.WriteLine($"Loaded {events?.Count ?? 0} events. - {events?[0].Name}");
+    StateHasChanged();
+  }
+}

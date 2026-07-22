@@ -1,0 +1,168 @@
+@page "/events/{id:int}/register"
+@using EventEaseApp.Models
+@using EventEaseApp.Services
+@inject EventService EventService
+@inject SessionStateService SessionState
+@inject AttendanceService AttendanceService
+@inject NavigationManager Navigation
+
+@if (eventItem is null)
+{
+  <div class="registration-container">
+    <p class="loading-text">Loading event details...</p>
+  </div>
+}
+else
+{
+  <div class="registration-container">
+    <!-- Back Button -->
+    <button class="btn-back" @onclick="GoBack" title="Back to event">
+      ← Back to event
+    </button>
+
+    @if (submitted)
+    {
+      <!-- Success State -->
+      <div class="registration-success">
+        <div class="success-icon">✓</div>
+        <h2>Registration Confirmed!</h2>
+        <p class="success-message">Thank you, <strong>@submittedName</strong>! Your registration for
+          <strong>@eventItem.Name</strong> has been received.
+        </p>
+
+        <div class="success-actions">
+          <button class="btn btn-primary" @onclick="GoBack">Back to event</button>
+          <button class="btn btn-outline-primary" @onclick="ResetForm">Register another attendee</button>
+        </div>
+      </div>
+    }
+    else
+    {
+      <!-- Registration Form -->
+      <div class="registration-content">
+        <!-- Event Info Header -->
+        <div class="registration-event-info">
+          <h1 class="registration-title">Register for Event</h1>
+
+          <div class="event-card-compact">
+            <h3 class="event-name-compact">@eventItem.Name</h3>
+            <div class="event-meta">
+              <span class="meta-item">📅 @eventItem.Date.ToString("MMM d, yyyy")</span>
+              <span class="meta-item">📍 @eventItem.Location</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+          <div class="alert alert-error">
+            <span class="alert-icon">⚠</span>
+            <span>@errorMessage</span>
+          </div>
+        }
+
+        <!-- Registration Form -->
+        <div class="registration-form-section">
+          <EditForm Model="registration" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+              <label for="name" class="form-label">Full Name</label>
+              <InputText id="name" class="form-control" @bind-Value="registration.Name"
+                         placeholder="Enter your full name" />
+              <ValidationMessage For="@(() => registration.Name)" class="validation-error" />
+            </div>
+
+            <div class="form-group">
+              <label for="email" class="form-label">Email Address</label>
+              <InputText id="email" class="form-control" type="email" @bind-Value="registration.Email"
+                         placeholder="Enter your email address" />
+              <ValidationMessage For="@(() => registration.Email)" class="validation-error" />
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-lg">Complete Registration</button>
+              <button type="button" class="btn btn-outline-secondary btn-lg" @onclick="GoBack">Cancel</button>
+            </div>
+          </EditForm>
+        </div>
+
+        <!-- Attendance Info -->
+        <div class="attendance-tracker">
+          <h3 class="tracker-title">Event Status</h3>
+          <div class="attendance-stat">
+            <div class="stat-number">@attendanceCount</div>
+            <div class="stat-label">people registered</div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
+@code {
+  [Parameter]
+  public int id { get; set; }
+
+  private EventModel? eventItem;
+  private RegistrationModel registration = new();
+  private bool submitted;
+  private string? errorMessage;
+  private string submittedName = string.Empty;
+  private int attendanceCount = 0;
+
+  protected override async Task OnParametersSetAsync()
+  {
+    eventItem = await EventService.GetByIdAsync(id);
+    if (eventItem is null)
+    {
+      Navigation.NavigateTo("/events");
+      return;
+    }
+
+    // Load attendance count from localStorage
+    attendanceCount = await AttendanceService.GetAttendanceCount(id);
+
+    registration = new RegistrationModel();
+    submitted = false;
+    errorMessage = null;
+  }
+
+  private async Task HandleValidSubmit()
+  {
+    try
+    {
+      if (string.IsNullOrWhiteSpace(registration.Name) || string.IsNullOrWhiteSpace(registration.Email))
+      {
+        errorMessage = "Please fill in all fields before submitting.";
+        return;
+      }
+
+      var submittedNameValue = registration.Name.Trim();
+
+      SessionState.UserName = submittedNameValue;
+      SessionState.UserEmail = registration.Email.Trim();
+
+      // Register and update count
+      await AttendanceService.RegisterAttendance(id, registration.Email.Trim());
+      attendanceCount = await AttendanceService.GetAttendanceCount(id);
+
+      submittedName = submittedNameValue;
+      submitted = true;
+      errorMessage = null;
+    }
+    catch (Exception)
+    {
+      errorMessage = "We couldn't process your registration. Please try again.";
+    }
+  }
+
+  private void ResetForm()
+  {
+    submitted = false;
+    registration = new RegistrationModel();
+    errorMessage = null;
+  }
+
+  private void GoBack() => Navigation.NavigateTo($"/events/{id}");
+}

@@ -1,0 +1,71 @@
+<header class="app-nav-header @(isCompact ? "is-compact" : null)">
+    <a class="app-brand" href="" aria-label="EventEase home">
+        <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4M16 2v4M3 10h18M8 15h.01M12 15h.01M16 15h.01" /></svg>
+        </span>
+        <span>
+            <span class="brand-name">EventEase</span>
+            <span class="brand-tagline">Find your next experience</span>
+        </span>
+    </a>
+
+    <button type="button" class="nav-toggle" @onclick="ToggleNavMenu" aria-label="Toggle navigation" aria-expanded="@(!collapseNavMenu)">
+        @if (collapseNavMenu)
+        {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+        }
+        else
+        {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18" /></svg>
+        }
+    </button>
+
+    <button type="button" class="sidebar-toggle" @onclick="ToggleCompactMode" title="@(isCompact ? "Expand navigation" : "Minimize navigation")" aria-label="@(isCompact ? "Expand navigation" : "Minimize navigation")" aria-pressed="@isCompact">
+        @if (isCompact)
+        {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6M15 18l6-6-6-6" /></svg>
+        }
+        else
+        {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6M9 18l-6-6 6-6" /></svg>
+        }
+    </button>
+</header>
+
+<div class="@NavMenuCssClass nav-panel @(isCompact ? "is-compact" : null)" @onclick="ToggleNavMenu">
+    <nav class="nav-list" aria-label="Main navigation">
+        <div class="nav-item">
+            <NavLink class="app-nav-link" href="" Match="NavLinkMatch.All" data-tooltip="Home">
+                <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z" /></svg>
+                <span>Home</span>
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="app-nav-link" href="events" data-tooltip="Explore events">
+                <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2" /><path d="M8 2v4M16 2v4M3 10h18M8 15h.01M12 15h.01M16 15h.01" /></svg>
+                <span>Explore events</span>
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<bool> CompactModeChanged { get; set; }
+
+    private bool collapseNavMenu = true;
+    private bool isCompact;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task ToggleCompactMode()
+    {
+        isCompact = !isCompact;
+        await CompactModeChanged.InvokeAsync(isCompact);
+    }
+}

@@ -1,0 +1,165 @@
+﻿@page "/"
+@using EventEaseApp.Models
+@using EventEaseApp.Services
+@inject EventService EventService
+
+<div class="home-page">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">Discover Your Next Event</h1>
+      <p class="hero-subtitle">Browse curated corporate and social experiences. Register in moments. Connect with your
+        community.</p>
+        <NavLink class="btn btn-primary btn-lg" href="events">
+          <span>Explore Events</span>
+          <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </NavLink>
+      </div>
+    </section>
+
+    <!-- Quick Stats Section -->
+    <section class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">@upcomingCount</div>
+          <div class="stat-label">Upcoming events</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">2.5K+</div>
+          <div class="stat-label">People registered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">50+</div>
+          <div class="stat-label">Cities worldwide</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+      <div class="section-header">
+        <h2>Why Choose EventEase?</h2>
+        <p>Everything you need to discover and register for amazing events.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="bi bi-calendar-check"></i>
+          </div>
+          <h3 class="feature-title">Easy Discovery</h3>
+          <p class="feature-description">Browse a curated collection of corporate summits, networking events, workshops,
+            and social gatherings all in one place.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="bi bi-cursor-fill"></i>
+            </div>
+            <h3 class="feature-title">One-Click Registration</h3>
+            <p class="feature-description">Register for events in seconds with our streamlined registration process. No
+              hassle, just simplicity.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="bi bi-people"></i>
+              </div>
+              <h3 class="feature-title">Connect & Network</h3>
+              <p class="feature-description">See who's attending, connect with fellow professionals, and build meaningful
+                business relationships.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="feature-icon">
+                  <i class="bi bi-bell"></i>
+                </div>
+                <h3 class="feature-title">Stay Updated</h3>
+                <p class="feature-description">Get real-time notifications about new events, registrations closing, and event
+                  details as they're updated.</p>
+                </div>
+
+                <div class="feature-card">
+                  <div class="feature-icon">
+                    <i class="bi bi-geo-alt"></i>
+                  </div>
+                  <h3 class="feature-title">Find Nearby Events</h3>
+                  <p class="feature-description">Filter events by location, date, and category to find exactly what you're looking
+                    for.</p>
+                  </div>
+
+                  <div class="feature-card">
+                    <div class="feature-icon">
+                      <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h3 class="feature-title">Secure & Reliable</h3>
+                    <p class="feature-description">Your data is safe with us. We use industry-standard security to protect your
+                      information.</p>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Upcoming Events Preview -->
+                @if (upcomingEvents != null && upcomingEvents.Count > 0)
+                {
+                  <section class="events-preview-section">
+                    <div class="section-header">
+                      <h2>Featured Events</h2>
+                      <p>Don't miss out on these popular upcoming events.</p>
+                    </div>
+
+                    <div class="events-preview-grid">
+                      @foreach (var ev in upcomingEvents.Take(3))
+                      {
+                        <div class="event-preview-card">
+                          <div class="event-preview-header">
+                            <h3>@ev.Name</h3>
+                            <span class="event-preview-date">@ev.Date.ToString("MMM d")</span>
+                          </div>
+                          <p class="event-preview-location">📍 @ev.Location</p>
+                          <p class="event-preview-description">@(ev.Description.Length > 100 ? ev.Description.Substring(0, 100) + "..." :
+                                                                                              ev.Description)</p>
+                            <NavLink class="btn btn-outline-primary" href="@($"/events/{ev.Id}")">
+                              View details
+                            </NavLink>
+                          </div>
+                        }
+                      </div>
+
+                      <div class="view-all-cta">
+                        <NavLink class="btn btn-primary btn-lg" href="events">
+                          View all events
+                        </NavLink>
+                      </div>
+                    </section>
+                  }
+
+                  <!-- CTA Section -->
+                  <section class="cta-section">
+                    <div class="cta-content">
+                      <h2>Ready to explore amazing events?</h2>
+                      <p>Join thousands of professionals discovering and attending incredible experiences.</p>
+                      <NavLink class="btn btn-primary btn-lg" href="events">
+                        Start exploring
+                      </NavLink>
+                    </div>
+                  </section>
+                </div>
+
+@code {
+  private List<EventModel>? upcomingEvents;
+  private int upcomingCount = 0;
+
+  protected override async Task OnInitializedAsync()
+  {
+    var allEvents = await EventService.GetAllAsync();
+
+    // Get upcoming events (sort by date)
+    upcomingEvents = allEvents
+      .Where(e => e.Date >= DateTime.Today)
+      .OrderBy(e => e.Date)
+      .ToList();
+
+    upcomingCount = upcomingEvents.Count;
+  }
+}

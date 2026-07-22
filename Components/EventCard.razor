@@ -1,0 +1,61 @@
+@using EventEaseApp.Models
+@inject NavigationManager Navigation
+
+@if (EventItem is not null)
+{
+  var isValid = IsValidEvent(EventItem);
+
+  <div class="event-card @(isValid ? string.Empty : "event-card-disabled")" @onclick="GoToDetails" role="button"
+       tabindex="0">
+    <div class="event-card-header">
+      <h3 class="event-name">@GetDisplayValue(EventItem.Name, "Untitled Event")</h3>
+      <div class="event-date">@GetDisplayDate(EventItem.Date)</div>
+    </div>
+    <div class="event-location">@GetDisplayValue(EventItem.Location, "Location TBD")</div>
+    <p class="event-description">@GetDisplayValue(EventItem.Description, "Details coming soon.")</p>
+
+    <div class="event-actions">
+      @if (isValid)
+      {
+        <button class="btn btn-sm btn-outline-primary" @onclick:stopPropagation="true" @onclick="GoToDetails">View
+          details</button>
+          <button class="btn btn-sm btn-outline-success" @onclick:stopPropagation="true"
+                  @onclick="GoToRegister">Register</button>
+        }
+      else
+        {
+          <span class="text-muted">Event details unavailable</span>
+        }
+      </div>
+    </div>
+  }
+
+@code {
+  [Parameter]
+  public EventModel? EventItem { get; set; }
+
+  private static bool IsValidEvent(EventModel? eventItem) =>
+    eventItem is not null && eventItem.Id > 0 && !string.IsNullOrWhiteSpace(eventItem.Name) &&
+!string.IsNullOrWhiteSpace(eventItem.Location);
+
+  private static string GetDisplayValue(string? value, string fallback) =>
+    string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+
+  private static string GetDisplayDate(DateTime date) => date == default ? "Date TBD" : date.ToString("MMM d, yyyy");
+
+  private void GoToDetails()
+  {
+    if (IsValidEvent(EventItem) && EventItem is not null)
+    {
+      Navigation.NavigateTo($"/events/{EventItem.Id}");
+    }
+  }
+
+  private void GoToRegister()
+  {
+    if (IsValidEvent(EventItem) && EventItem is not null)
+    {
+      Navigation.NavigateTo($"/events/{EventItem.Id}/register");
+    }
+  }
+}

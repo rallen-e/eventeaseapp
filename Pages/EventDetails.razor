@@ -1,0 +1,100 @@
+@page "/events/{id:int}"
+@using EventEaseApp.Models
+@using EventEaseApp.Services
+@inject EventService EventService
+@inject AttendanceService AttendanceService
+@inject NavigationManager Navigation
+
+@if (eventItem is null && !isNotFound)
+{
+  <div class="event-details-loading">
+    <p>Loading event details...</p>
+  </div>
+}
+else if (isNotFound)
+{
+  <div class="event-details-container">
+    <div class="event-not-found">
+      <h2>Event Not Found</h2>
+      <p>The event you're looking for doesn't exist or has been removed.</p>
+      <button class="btn btn-primary" @onclick="GoBack">
+        <span>← Back to Events</span>
+      </button>
+    </div>
+  </div>
+}
+else
+{
+  <div class="event-details-container">
+    <!-- Header with back button -->
+    <button class="btn-back" @onclick="GoBack" title="Back to events">
+      ← Back to events
+    </button>
+
+    <!-- Hero Section -->
+    <div class="event-hero">
+      <h1 class="event-detail-title">@eventItem!.Name</h1>
+
+      <!-- Info Grid -->
+      <div class="event-info-grid">
+        <div class="event-info-card">
+          <div class="info-label">Date & Time</div>
+          <div class="info-value">@eventItem.Date.ToString("dddd, MMM d, yyyy")</div>
+        </div>
+
+        <div class="event-info-card">
+          <div class="info-label">Location</div>
+          <div class="info-value">📍 @eventItem.Location</div>
+        </div>
+
+        <div class="event-info-card">
+          <div class="info-label">Attendees</div>
+          <div class="info-value">@attendanceCount registered</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description Section -->
+    <div class="event-description-section">
+      <h2>About This Event</h2>
+      <p class="event-full-description">@eventItem.Description</p>
+    </div>
+
+    <!-- Action Section -->
+    <div class="event-actions-section">
+      <button class="btn btn-primary btn-lg" @onclick="GoToRegister">Register Now</button>
+    </div>
+  </div>
+}
+
+@code {
+  [Parameter]
+  public int id { get; set; }
+
+  private EventModel? eventItem;
+  private bool isNotFound;
+  private int attendanceCount = 0;
+
+  protected override async Task OnParametersSetAsync()
+  {
+    isNotFound = false;
+
+    if (id <= 0)
+    {
+      isNotFound = true;
+      return;
+    }
+
+    eventItem = await EventService.GetByIdAsync(id);
+    isNotFound = eventItem is null;
+
+    // Load attendance count from localStorage
+    if (!isNotFound)
+    {
+      attendanceCount = await AttendanceService.GetAttendanceCount(id);
+    }
+  }
+
+  private void GoToRegister() => Navigation.NavigateTo($"/events/{id}/register");
+  private void GoBack() => Navigation.NavigateTo("/events");
+}
