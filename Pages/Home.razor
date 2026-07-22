@@ -119,7 +119,7 @@
                           <p class="event-preview-location">📍 @ev.Location</p>
                           <p class="event-preview-description">@(ev.Description.Length > 100 ? ev.Description.Substring(0, 100) + "..." :
                                                                                               ev.Description)</p>
-                            <NavLink class="btn btn-outline-primary" href="@($"/events/{ev.Id}")">
+                            <NavLink class="btn btn-outline-primary" href="@($"events/{ev.Id}")">
                               View details
                             </NavLink>
                           </div>

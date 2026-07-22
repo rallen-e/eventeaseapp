@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <script>
+        const repositoryPath = '/eventeaseapp';
+        const route = window.location.pathname.startsWith(repositoryPath)
+            ? window.location.pathname.slice(repositoryPath.length) + window.location.search + window.location.hash
+            : '/';
+
+        window.location.replace(`${repositoryPath}/?redirect=${encodeURIComponent(route)}`);
+    </script>
+</head>
+<body></body>
+</html>

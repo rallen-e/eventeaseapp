@@ -47,7 +47,7 @@
   {
     if (IsValidEvent(EventItem) && EventItem is not null)
     {
-      Navigation.NavigateTo($"/events/{EventItem.Id}");
+      Navigation.NavigateTo($"events/{EventItem.Id}");
     }
   }
 
@@ -55,7 +55,7 @@
   {
     if (IsValidEvent(EventItem) && EventItem is not null)
     {
-      Navigation.NavigateTo($"/events/{EventItem.Id}/register");
+      Navigation.NavigateTo($"events/{EventItem.Id}/register");
     }
   }
 }

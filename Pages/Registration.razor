@@ -116,7 +116,7 @@ else
     eventItem = await EventService.GetByIdAsync(id);
     if (eventItem is null)
     {
-      Navigation.NavigateTo("/events");
+      Navigation.NavigateTo("events");
       return;
     }
 
@@ -164,5 +164,5 @@ else
     errorMessage = null;
   }
 
-  private void GoBack() => Navigation.NavigateTo($"/events/{id}");
+  private void GoBack() => Navigation.NavigateTo($"events/{id}");
 }
